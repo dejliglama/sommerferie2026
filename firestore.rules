@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Alle i familien logger anonymt ind (usynligt for brugeren) og må læse
+    // alt i den fælles rejse, men kun skrive deres eget dokument (uid = deres eget id).
+    match /trips/{tripId}/players/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /trips/{tripId}/positions/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /trips/{tripId}/counters/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

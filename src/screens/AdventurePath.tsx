@@ -1,0 +1,218 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { waypoints, cumulativeDistances, totalDistanceKm, type Waypoint } from "../data/route";
+import { projectOntoRoute, computeEta, formatDuration, formatClock, type EtaResult } from "../lib/geo";
+import { pathPoint, TOTAL_SVG_HEIGHT, PATH_WIDTH } from "../lib/pathShape";
+import { buildDayNightSegments } from "../lib/pathDayNight";
+import { isNight } from "../lib/daynight";
+import type { PlayerPosition } from "../lib/trip";
+
+interface Props {
+  myUid: string;
+  myName: string;
+  myEmoji: string;
+  positions: PlayerPosition[];
+  onLocate: (lat: number, lon: number, progressFraction: number) => void;
+}
+
+const waypointT = waypoints.map((_, i) => cumulativeDistances[i] / totalDistanceKm);
+
+// Lidt "forspring" så et fun fact låses op, lige før man præcist rammer punktet på GPS.
+const UNLOCK_BUFFER = 0.03;
+
+export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: Props) {
+  const [locating, setLocating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [eta, setEta] = useState<EtaResult | null>(null);
+  const [openFact, setOpenFact] = useState<Waypoint | null>(null);
+  const [lockedHint, setLockedHint] = useState(false);
+  const svgWrapRef = useRef<HTMLDivElement>(null);
+  const myMarkerRef = useRef<SVGGElement>(null);
+
+  const dayNightSegments = useMemo(() => buildDayNightSegments(), []);
+
+  function locate() {
+    if (!("geolocation" in navigator)) {
+      setError("Din enhed understøtter ikke GPS-lokation.");
+      return;
+    }
+    setLocating(true);
+    setError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const projection = projectOntoRoute(latitude, longitude);
+        const result = computeEta(projection);
+        setEta(result);
+        onLocate(latitude, longitude, projection.progressFraction);
+        setLocating(false);
+      },
+      (err) => {
+        setError(
+          err.code === err.PERMISSION_DENIED
+            ? "I skal tillade lokation for at appen kan finde jer på stien."
+            : "Kunne ikke finde GPS-position lige nu. Prøv igen."
+        );
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  }
+
+  useEffect(() => {
+    myMarkerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [eta]);
+
+  useEffect(() => {
+    if (!lockedHint) return;
+    const t = setTimeout(() => setLockedHint(false), 1800);
+    return () => clearTimeout(t);
+  }, [lockedHint]);
+
+  const myProgress = positions.find((p) => p.uid === myUid)?.progressFraction ?? null;
+  const effectiveProgress = myProgress ?? 0;
+
+  function isUnlocked(i: number): boolean {
+    return i === 0 || waypointT[i] <= effectiveProgress + UNLOCK_BUFFER;
+  }
+
+  function handleWaypointClick(wp: Waypoint, i: number) {
+    if (!wp.funFacts?.length) return;
+    if (!isUnlocked(i)) {
+      setLockedHint(true);
+      return;
+    }
+    setOpenFact(wp);
+  }
+
+  return (
+    <div className="screen path-screen">
+      <div className="eta-panel">
+        <button className="big-button primary locate-btn" onClick={locate} disabled={locating}>
+          {locating ? "📍 Finder jer..." : "📍 Hvor er vi?"}
+        </button>
+        {error && <p className="error-text">{error}</p>}
+        {eta && (
+          <div className="eta-results">
+            <div className="eta-row">
+              <span>{eta.isFinished ? "🎉 I er fremme!" : `Næste stop: ${eta.nextWaypoint.emoji} ${eta.nextWaypoint.name}`}</span>
+              {!eta.isFinished && <strong>om {formatDuration(eta.etaNext.getTime() - Date.now())}</strong>}
+            </div>
+            <div className="eta-row">
+              <span>🏁 Fremme i Stresa</span>
+              <strong>om {formatDuration(eta.etaFinal.getTime() - Date.now())} ({formatClock(eta.etaFinal)})</strong>
+            </div>
+            <div className={`drift-badge ${eta.driftMs > 5 * 60000 ? "behind" : eta.driftMs < -5 * 60000 ? "ahead" : "ontime"}`}>
+              {eta.driftMs > 5 * 60000
+                ? `⏱️ ${formatDuration(eta.driftMs)} bagud i forhold til planen`
+                : eta.driftMs < -5 * 60000
+                ? `⚡ ${formatDuration(-eta.driftMs)} foran planen`
+                : "✅ Lige efter planen"}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {lockedHint && (
+        <p className="locked-hint">🔒 Kør lidt længere, så låses denne fun fact op!</p>
+      )}
+
+      <div className="daynight-legend">
+        <span><i className="legend-swatch legend-day" /> ☀️ Dag (07-20)</span>
+        <span><i className="legend-swatch legend-night" /> 🌙 Nat (20-07)</span>
+      </div>
+
+      <div className="svg-scroll-wrap" ref={svgWrapRef}>
+        <svg
+          viewBox={`0 0 ${PATH_WIDTH} ${TOTAL_SVG_HEIGHT}`}
+          width="100%"
+          height={TOTAL_SVG_HEIGHT * 0.6}
+          preserveAspectRatio="xMidYMin meet"
+        >
+          {dayNightSegments.map((seg, i) => (
+            <path key={`road-${i}`} d={seg.d} className={`road-path ${seg.isNight ? "road-path-night" : "road-path-day"}`} />
+          ))}
+          {dayNightSegments.map((seg, i) => (
+            <path
+              key={`dash-${i}`}
+              d={seg.d}
+              className={`road-path-dash ${seg.isNight ? "road-path-dash-night" : ""}`}
+            />
+          ))}
+
+          {waypoints.map((wp, i) => {
+            const { x, y } = pathPoint(waypointT[i]);
+            const unlocked = isUnlocked(i);
+            const hasFacts = Boolean(wp.funFacts?.length);
+            const wpNight = isNight(new Date(wp.scheduledTime));
+            return (
+              <g
+                key={wp.id}
+                transform={`translate(${x}, ${y})`}
+                className={`waypoint-group ${hasFacts ? "clickable" : ""} ${unlocked ? "unlocked" : "locked"}`}
+                onClick={() => handleWaypointClick(wp, i)}
+              >
+                <circle r="22" className={`waypoint-circle wp-${wp.type} ${wpNight ? "wp-night" : ""}`} />
+                <text textAnchor="middle" dy="8" fontSize="22">
+                  {wp.emoji}
+                </text>
+                <text textAnchor="middle" dy="38" fontSize="13" className="waypoint-label">
+                  {wp.name}
+                </text>
+                <text textAnchor="middle" dy="52" fontSize="11" className="waypoint-time">
+                  {wpNight ? "🌙" : "☀️"} ca. {formatClock(new Date(wp.scheduledTime))}
+                </text>
+                {hasFacts && (
+                  <text textAnchor="middle" x="18" y="-16" fontSize="16" className="fact-badge">
+                    {unlocked ? "💡" : "🔒"}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {positions.map((p) => {
+            const { x, y } = pathPoint(Math.max(0, Math.min(1, p.progressFraction)));
+            const isMe = p.uid === myUid;
+            return (
+              <g
+                key={p.uid}
+                ref={isMe ? myMarkerRef : undefined}
+                transform={`translate(${x + (isMe ? -18 : 18)}, ${y - 34})`}
+                className="player-marker"
+              >
+                <circle r="18" className={isMe ? "player-dot me" : "player-dot"} />
+                <text textAnchor="middle" dy="7" fontSize="18">
+                  {isMe ? myEmoji : "👤"}
+                </text>
+                <text textAnchor="middle" dy="-24" fontSize="11" className="player-name">
+                  {p.name}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      {myProgress === null && (
+        <p className="hint-text">Tryk "Hvor er vi?" for at se jeres prik på stien 👆</p>
+      )}
+
+      {openFact && (
+        <div className="fact-overlay" onClick={() => setOpenFact(null)}>
+          <div className="fact-card" onClick={(e) => e.stopPropagation()}>
+            <button className="fact-close" onClick={() => setOpenFact(null)} aria-label="Luk">
+              ×
+            </button>
+            <h3>
+              {openFact.emoji} {openFact.name}
+            </h3>
+            {openFact.funFacts?.map((fact, idx) => (
+              <p key={idx} className="fact-text">
+                <span className="fact-emoji">{fact.emoji}</span> {fact.text}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
