@@ -19,6 +19,12 @@ const legIsStay = waypoints.slice(0, -1).map((_, i) => {
   return speedKmh < STAY_SPEED_THRESHOLD_KMH;
 });
 
+// Rødbyhavn -> Puttgarden er en færgeoverfart, ikke en kørt strækning — her skal
+// vejen "brydes" og vise vand i stedet.
+const FERRY_LEG_INDEX = waypoints.findIndex((w) => w.id === "rodbyhavn");
+export const FERRY_T_START = waypointT[FERRY_LEG_INDEX];
+export const FERRY_T_END = waypointT[FERRY_LEG_INDEX + 1];
+
 // Finder dag/nat-status et sted midt mellem to waypoints (t = 0..1 langs hele ruten).
 function nightAtT(t: number): boolean {
   let i = 0;
@@ -34,35 +40,49 @@ function nightAtT(t: number): boolean {
   return isNight(time);
 }
 
-export interface DayNightSegment {
+export type RoadSegmentKind = "day" | "night" | "ferry";
+
+export interface RoadSegment {
   d: string;
-  isNight: boolean;
+  kind: RoadSegmentKind;
 }
 
-// Deler vejen op i skiftende dag/nat-strækninger, så vi visuelt kan gøre natte-kørslen mørkere.
-export function buildDayNightSegments(steps = 300): DayNightSegment[] {
-  const segments: DayNightSegment[] = [];
+function kindAtT(t: number): RoadSegmentKind {
+  if (t >= FERRY_T_START && t <= FERRY_T_END) return "ferry";
+  return nightAtT(t) ? "night" : "day";
+}
+
+// Deler vejen op i skiftende dag/nat/færge-strækninger, så vi visuelt kan gøre
+// natte-kørslen mørkere og færgeoverfarten til vand.
+export function buildRoadSegments(steps = 300): RoadSegment[] {
+  const segments: RoadSegment[] = [];
   let currentD = "";
-  let currentNight: boolean | null = null;
+  let currentKind: RoadSegmentKind | null = null;
   let prevPoint: { x: number; y: number } | null = null;
 
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const { x, y } = pathPoint(t);
-    const night = nightAtT(t);
+  // Sørg for at vi rammer præcis på færge-grænserne, så vandet starter/slutter pænt.
+  const boundaryTs = [FERRY_T_START, FERRY_T_END];
+  const sampleTs = new Set<number>();
+  for (let i = 0; i <= steps; i++) sampleTs.add(i / steps);
+  boundaryTs.forEach((t) => sampleTs.add(t));
+  const sorted = Array.from(sampleTs).sort((a, b) => a - b);
 
-    if (currentNight === null) {
+  for (const t of sorted) {
+    const { x, y } = pathPoint(t);
+    const kind = kindAtT(t);
+
+    if (currentKind === null) {
       currentD = `M ${x} ${y}`;
-      currentNight = night;
-    } else if (night !== currentNight) {
-      segments.push({ d: currentD, isNight: currentNight });
+      currentKind = kind;
+    } else if (kind !== currentKind) {
+      segments.push({ d: currentD, kind: currentKind });
       currentD = `M ${prevPoint!.x} ${prevPoint!.y} L ${x} ${y}`;
-      currentNight = night;
+      currentKind = kind;
     } else {
       currentD += ` L ${x} ${y}`;
     }
     prevPoint = { x, y };
   }
-  segments.push({ d: currentD, isNight: currentNight! });
+  segments.push({ d: currentD, kind: currentKind! });
   return segments;
 }

@@ -284,6 +284,125 @@ button {
   stroke-dasharray: 4 12;
 }
 
+.road-path-dash-ferry {
+  stroke: #ffffff;
+  stroke-width: 3;
+  stroke-dasharray: 2 10;
+  opacity: 0.9;
+}
+
+/* ---------- Færge / vand ---------- */
+.ferry-water {
+  fill: #6ec3e0;
+  stroke: #4fa8c9;
+  stroke-width: 3;
+}
+
+.ferry-wave {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.ferry-boat {
+  text-anchor: middle;
+}
+
+/* ---------- Pynte-illustrationer ---------- */
+.doodle {
+  pointer-events: none;
+}
+
+.doodle-house.house-a {
+  fill: #e8c99b;
+}
+
+.doodle-house.house-b {
+  fill: #f2d9ab;
+}
+
+.doodle-house.house-c {
+  fill: #e0bd8c;
+}
+
+.doodle-roof.roof-a,
+.doodle-roof.roof-c {
+  fill: #b5651d;
+}
+
+.doodle-roof.roof-b {
+  fill: #8a4513;
+}
+
+.doodle-tower {
+  fill: #c9c2b4;
+}
+
+.doodle-tower-roof {
+  fill: #7a5230;
+}
+
+.doodle-tower-tip {
+  fill: #7a5230;
+}
+
+.doodle-hotel-body {
+  fill: #fdf6e8;
+  stroke: #d8c9a3;
+  stroke-width: 1.5;
+}
+
+.doodle-hotel-roof {
+  fill: var(--secondary);
+}
+
+.doodle-hotel-door {
+  fill: #8a5a2b;
+}
+
+.doodle-hotel-window {
+  fill: #cdeffb;
+  stroke: #8a5a2b;
+  stroke-width: 1;
+}
+
+.doodle-zzz {
+  fill: #5c4b8a;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.doodle-mountain-back {
+  fill: #a89f91;
+}
+
+.doodle-snowcap-back {
+  fill: #f4f7fb;
+}
+
+.doodle-mountain-front {
+  fill: #8b7f6e;
+}
+
+.doodle-snowcap-front {
+  fill: #ffffff;
+}
+
+.doodle-lake-water {
+  fill: #6ec3e0;
+  stroke: #4fa8c9;
+  stroke-width: 2;
+}
+
+.doodle-lake-wave {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.6;
+  opacity: 0.8;
+}
+
 .daynight-legend {
   display: flex;
   gap: 16px;

@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { waypoints, cumulativeDistances, totalDistanceKm, type Waypoint } from "../data/route";
 import { projectOntoRoute, computeEta, formatDuration, formatClock, type EtaResult } from "../lib/geo";
 import { pathPoint, computeDisplayT, TOTAL_SVG_HEIGHT, PATH_WIDTH } from "../lib/pathShape";
-import { buildDayNightSegments } from "../lib/pathDayNight";
+import { buildRoadSegments } from "../lib/pathDayNight";
 import { isNight } from "../lib/daynight";
+import { MedievalTown, HotelZzz, SnowMountain, Lake } from "../components/RouteDoodles";
 import type { PlayerPosition } from "../lib/trip";
 
 interface Props {
@@ -22,6 +23,25 @@ const waypointDisplayT = computeDisplayT(waypointT, MIN_WAYPOINT_GAP_T);
 // Lidt "forspring" så et fun fact låses op, lige før man præcist rammer punktet på GPS.
 const UNLOCK_BUFFER = 0.03;
 
+// Små pynte-illustrationer ved udvalgte stop, placeret som et sidespring fra selve mærket.
+const WAYPOINT_DOODLES: Record<string, { render: () => ReactNode; dx: number; dy: number }[]> = {
+  chur: [
+    { render: () => <MedievalTown />, dx: -58, dy: 2 },
+    { render: () => <HotelZzz />, dx: 60, dy: -4 },
+  ],
+  sanbernardino: [{ render: () => <SnowMountain />, dx: -58, dy: 5 }],
+  lagomaggiore: [{ render: () => <Lake />, dx: -58, dy: 5 }],
+};
+
+// Vand-illustrationen skal forbinde de VISTE mærker (display-t), ikke den sande t —
+// ellers passer den ikke, når Rødbyhavn/Puttgarden bliver skubbet fra hinanden for læsbarhed.
+const RODBYHAVN_INDEX = waypoints.findIndex((w) => w.id === "rodbyhavn");
+const ferryDisplayStart = waypointDisplayT[RODBYHAVN_INDEX];
+const ferryDisplayEnd = waypointDisplayT[RODBYHAVN_INDEX + 1];
+const ferryStartPt = pathPoint(ferryDisplayStart);
+const ferryEndPt = pathPoint(ferryDisplayEnd);
+const ferryMidPt = pathPoint((ferryDisplayStart + ferryDisplayEnd) / 2);
+
 export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: Props) {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +51,7 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
   const svgWrapRef = useRef<HTMLDivElement>(null);
   const myMarkerRef = useRef<SVGGElement>(null);
 
-  const dayNightSegments = useMemo(() => buildDayNightSegments(), []);
+  const roadSegments = useMemo(() => buildRoadSegments(), []);
 
   function locate() {
     if (!("geolocation" in navigator)) {
@@ -132,16 +152,38 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
           className="path-svg"
           preserveAspectRatio="xMidYMin meet"
         >
-          {dayNightSegments.map((seg, i) => (
-            <path key={`road-${i}`} d={seg.d} className={`road-path ${seg.isNight ? "road-path-night" : "road-path-day"}`} />
-          ))}
-          {dayNightSegments.map((seg, i) => (
+          <ellipse
+            cx={(ferryStartPt.x + ferryEndPt.x) / 2}
+            cy={(ferryStartPt.y + ferryEndPt.y) / 2}
+            rx="160"
+            ry={Math.abs(ferryEndPt.y - ferryStartPt.y) / 2 + 36}
+            className="ferry-water"
+          />
+          <path
+            d={`M ${ferryMidPt.x - 60} ${ferryMidPt.y - 12} Q ${ferryMidPt.x - 40} ${ferryMidPt.y - 20} ${ferryMidPt.x - 20} ${ferryMidPt.y - 12} T ${ferryMidPt.x + 20} ${ferryMidPt.y - 12} T ${ferryMidPt.x + 60} ${ferryMidPt.y - 12}`}
+            className="ferry-wave"
+          />
+          <path
+            d={`M ${ferryMidPt.x - 60} ${ferryMidPt.y + 14} Q ${ferryMidPt.x - 40} ${ferryMidPt.y + 6} ${ferryMidPt.x - 20} ${ferryMidPt.y + 14} T ${ferryMidPt.x + 20} ${ferryMidPt.y + 14} T ${ferryMidPt.x + 60} ${ferryMidPt.y + 14}`}
+            className="ferry-wave"
+          />
+
+          {roadSegments
+            .filter((seg) => seg.kind !== "ferry")
+            .map((seg, i) => (
+              <path key={`road-${i}`} d={seg.d} className={`road-path ${seg.kind === "night" ? "road-path-night" : "road-path-day"}`} />
+            ))}
+          {roadSegments.map((seg, i) => (
             <path
               key={`dash-${i}`}
               d={seg.d}
-              className={`road-path-dash ${seg.isNight ? "road-path-dash-night" : ""}`}
+              className={`road-path-dash ${seg.kind === "night" ? "road-path-dash-night" : ""} ${seg.kind === "ferry" ? "road-path-dash-ferry" : ""}`}
             />
           ))}
+
+          <text textAnchor="middle" x={ferryMidPt.x} y={ferryMidPt.y} dy="8" fontSize="26" className="ferry-boat">
+            ⛴️
+          </text>
 
           {waypoints.map((wp, i) => {
             const { x, y } = pathPoint(waypointDisplayT[i]);
@@ -155,6 +197,11 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
                 className={`waypoint-group ${hasFacts ? "clickable" : ""} ${unlocked ? "unlocked" : "locked"}`}
                 onClick={() => handleWaypointClick(wp, i)}
               >
+                {WAYPOINT_DOODLES[wp.id]?.map((doodle, di) => (
+                  <g key={di} transform={`translate(${doodle.dx}, ${doodle.dy})`}>
+                    {doodle.render()}
+                  </g>
+                ))}
                 <circle r="30" className={`waypoint-circle wp-${wp.type} ${wpNight ? "wp-night" : ""}`} />
                 <text textAnchor="middle" dy="11" fontSize="30">
                   {wp.emoji}
