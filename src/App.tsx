@@ -15,6 +15,7 @@ import {
   bumpCounter,
   type PlayerPosition,
   type PlayerCounters,
+  type CounterField,
 } from "./lib/trip";
 
 export default function App() {
@@ -77,7 +78,7 @@ export default function App() {
     });
   }
 
-  function handleBump(field: "iceCream" | "tisse", delta: 1 | -1 = 1) {
+  function handleBump(field: CounterField, delta: 1 | -1 = 1) {
     if (!uid || !player) return;
     const existing = counters.find((c) => c.uid === uid);
     if (delta < 0 && (!existing || existing[field] <= 0)) return;
@@ -88,7 +89,18 @@ export default function App() {
       if (found) {
         return prev.map((c) => (c.uid === uid ? { ...c, [field]: Math.max(0, c[field] + delta) } : c));
       }
-      return [...prev, { uid, name: player.name, iceCream: field === "iceCream" ? 1 : 0, tisse: field === "tisse" ? 1 : 0 }];
+      return [
+        ...prev,
+        {
+          uid,
+          name: player.name,
+          iceCream: 0,
+          tisse: 0,
+          coffee: 0,
+          snack: 0,
+          [field]: 1,
+        },
+      ];
     });
   }
 

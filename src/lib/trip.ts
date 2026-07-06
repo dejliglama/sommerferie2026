@@ -24,11 +24,15 @@ export interface PlayerPosition {
   updatedAt: number | null;
 }
 
+export type CounterField = "iceCream" | "tisse" | "coffee" | "snack";
+
 export interface PlayerCounters {
   uid: string;
   name: string;
   iceCream: number;
   tisse: number;
+  coffee: number;
+  snack: number;
 }
 
 // Disse hjælpere kaldes kun efter ensureAnonymousAuth() er lykkedes, hvilket
@@ -86,7 +90,7 @@ export function subscribePositions(cb: (positions: PlayerPosition[]) => void): U
 export async function bumpCounter(
   uid: string,
   name: string,
-  field: "iceCream" | "tisse",
+  field: CounterField,
   delta: 1 | -1 = 1
 ): Promise<void> {
   await setDoc(
@@ -106,6 +110,8 @@ export function subscribeCounters(cb: (counters: PlayerCounters[]) => void): Uns
           name: data.name,
           iceCream: data.iceCream ?? 0,
           tisse: data.tisse ?? 0,
+          coffee: data.coffee ?? 0,
+          snack: data.snack ?? 0,
         };
       })
     );
