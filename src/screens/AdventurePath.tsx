@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { waypoints, cumulativeDistances, totalDistanceKm, type Waypoint } from "../data/route";
 import { projectOntoRoute, computeEta, formatDuration, formatClock, type EtaResult } from "../lib/geo";
-import { pathPoint, TOTAL_SVG_HEIGHT, PATH_WIDTH } from "../lib/pathShape";
+import { pathPoint, computeDisplayT, TOTAL_SVG_HEIGHT, PATH_WIDTH } from "../lib/pathShape";
 import { buildDayNightSegments } from "../lib/pathDayNight";
 import { isNight } from "../lib/daynight";
 import type { PlayerPosition } from "../lib/trip";
@@ -15,6 +15,9 @@ interface Props {
 }
 
 const waypointT = waypoints.map((_, i) => cumulativeDistances[i] / totalDistanceKm);
+// Minimumsafstand mellem waypoint-mærker på kortet, kun til visning (se computeDisplayT).
+const MIN_WAYPOINT_GAP_T = 0.063;
+const waypointDisplayT = computeDisplayT(waypointT, MIN_WAYPOINT_GAP_T);
 
 // Lidt "forspring" så et fun fact låses op, lige før man præcist rammer punktet på GPS.
 const UNLOCK_BUFFER = 0.03;
@@ -124,8 +127,9 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
       <div className="svg-scroll-wrap" ref={svgWrapRef}>
         <svg
           viewBox={`0 0 ${PATH_WIDTH} ${TOTAL_SVG_HEIGHT}`}
-          width="100%"
-          height={TOTAL_SVG_HEIGHT * 0.6}
+          width={PATH_WIDTH}
+          height={TOTAL_SVG_HEIGHT}
+          className="path-svg"
           preserveAspectRatio="xMidYMin meet"
         >
           {dayNightSegments.map((seg, i) => (
@@ -140,7 +144,7 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
           ))}
 
           {waypoints.map((wp, i) => {
-            const { x, y } = pathPoint(waypointT[i]);
+            const { x, y } = pathPoint(waypointDisplayT[i]);
             const unlocked = isUnlocked(i);
             const hasFacts = Boolean(wp.funFacts?.length);
             const wpNight = isNight(new Date(wp.scheduledTime));
@@ -151,18 +155,18 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
                 className={`waypoint-group ${hasFacts ? "clickable" : ""} ${unlocked ? "unlocked" : "locked"}`}
                 onClick={() => handleWaypointClick(wp, i)}
               >
-                <circle r="22" className={`waypoint-circle wp-${wp.type} ${wpNight ? "wp-night" : ""}`} />
-                <text textAnchor="middle" dy="8" fontSize="22">
+                <circle r="30" className={`waypoint-circle wp-${wp.type} ${wpNight ? "wp-night" : ""}`} />
+                <text textAnchor="middle" dy="11" fontSize="30">
                   {wp.emoji}
                 </text>
-                <text textAnchor="middle" dy="38" fontSize="13" className="waypoint-label">
+                <text textAnchor="middle" dy="50" fontSize="17" className="waypoint-label">
                   {wp.name}
                 </text>
-                <text textAnchor="middle" dy="52" fontSize="11" className="waypoint-time">
+                <text textAnchor="middle" dy="69" fontSize="14" className="waypoint-time">
                   {wpNight ? "🌙" : "☀️"} ca. {formatClock(new Date(wp.scheduledTime))}
                 </text>
                 {hasFacts && (
-                  <text textAnchor="middle" x="18" y="-16" fontSize="16" className="fact-badge">
+                  <text textAnchor="middle" x="24" y="-22" fontSize="21" className="fact-badge">
                     {unlocked ? "💡" : "🔒"}
                   </text>
                 )}
@@ -177,14 +181,14 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
               <g
                 key={p.uid}
                 ref={isMe ? myMarkerRef : undefined}
-                transform={`translate(${x + (isMe ? -18 : 18)}, ${y - 34})`}
+                transform={`translate(${x + (isMe ? -24 : 24)}, ${y - 44})`}
                 className="player-marker"
               >
-                <circle r="18" className={isMe ? "player-dot me" : "player-dot"} />
-                <text textAnchor="middle" dy="7" fontSize="18">
+                <circle r="24" className={isMe ? "player-dot me" : "player-dot"} />
+                <text textAnchor="middle" dy="9" fontSize="24">
                   {isMe ? myEmoji : "👤"}
                 </text>
-                <text textAnchor="middle" dy="-24" fontSize="11" className="player-name">
+                <text textAnchor="middle" dy="-32" fontSize="14" className="player-name">
                   {p.name}
                 </text>
               </g>

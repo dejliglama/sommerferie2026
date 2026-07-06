@@ -250,9 +250,15 @@ button {
   overflow: hidden;
 }
 
+.path-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .road-path {
   fill: none;
-  stroke-width: 34;
+  stroke-width: 42;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -268,14 +274,14 @@ button {
 .road-path-dash {
   fill: none;
   stroke: var(--road-dash);
-  stroke-width: 3;
-  stroke-dasharray: 10 14;
+  stroke-width: 4;
+  stroke-dasharray: 12 16;
   stroke-linecap: round;
 }
 
 .road-path-dash-night {
   stroke: #ffe9a8;
-  stroke-dasharray: 3 10;
+  stroke-dasharray: 4 12;
 }
 
 .daynight-legend {

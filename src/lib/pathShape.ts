@@ -1,8 +1,8 @@
 // Genererer en stiliseret, snoet "eventyrsti" (som et brætspil) i SVG-koordinater,
 // helt uafhængig af rigtig geografi — kun waypointernes indbyrdes afstand (t=0..1) bruges.
 export const PATH_WIDTH = 400;
-export const PATH_HEIGHT_PER_UNIT = 1500;
-const AMPLITUDE = 130;
+export const PATH_HEIGHT_PER_UNIT = 1900;
+const AMPLITUDE = 100;
 const CENTER_X = PATH_WIDTH / 2;
 const WAVES = 3.4;
 
@@ -23,3 +23,29 @@ export function buildPathD(steps = 300): string {
 }
 
 export const TOTAL_SVG_HEIGHT = PATH_HEIGHT_PER_UNIT + 120;
+
+// Nogle waypoints ligger meget tæt (eller oveni hinanden) i virkelig afstand langs ruten
+// (fx Viamala og Thusis). Til VISNING af mærker/labels presser vi dem fra hinanden med en
+// minimumsafstand, så teksten aldrig overlapper — men uden at røre den "rigtige" t-værdi,
+// som stadig bruges til GPS-matching og oplåsning af fun facts.
+export function computeDisplayT(trueT: number[], minGap: number): number[] {
+  const n = trueT.length;
+  const forward = [...trueT];
+  for (let i = 1; i < n; i++) {
+    forward[i] = Math.max(trueT[i], forward[i - 1] + minGap);
+  }
+
+  const last = forward[n - 1];
+  if (last <= trueT[n - 1] + 1e-9) {
+    return forward;
+  }
+
+  // Der var ikke plads nok til at nå den sidste waypoint uden at "flyde over" —
+  // pres i stedet bagfra, forankret i den rigtige slutposition.
+  const backward = [...forward];
+  backward[n - 1] = trueT[n - 1];
+  for (let i = n - 2; i >= 0; i--) {
+    backward[i] = Math.min(forward[i], backward[i + 1] - minGap);
+  }
+  return backward;
+}
