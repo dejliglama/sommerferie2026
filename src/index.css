@@ -245,7 +245,6 @@ button {
 }
 
 .svg-scroll-wrap {
-  background: rgba(255, 255, 255, 0.35);
   border-radius: 18px;
   overflow: hidden;
 }
@@ -403,40 +402,17 @@ button {
   opacity: 0.8;
 }
 
-.daynight-legend {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 8px;
-}
-
-.daynight-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.legend-swatch {
-  width: 16px;
-  height: 8px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.legend-day {
-  background: var(--road);
-}
-
-.legend-night {
-  background: #2b2657;
-}
-
 .waypoint-time {
   fill: #444;
   font-weight: 600;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+}
+
+.waypoint-short {
+  fill: #5a5248;
+  font-weight: 500;
   paint-order: stroke;
   stroke: white;
   stroke-width: 3px;

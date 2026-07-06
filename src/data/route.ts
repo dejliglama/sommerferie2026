@@ -82,12 +82,16 @@ export const waypoints: Waypoint[] = [
         emoji: "🐦",
         text: "Ruten hedder 'Vogelfluglinie' — Fugleflugtslinjen! Den følger nøjagtig den vej, som trækfugle har fløjet i tusindvis af år mellem Skandinavien og Sydeuropa.",
       },
+      {
+        emoji: "🍔",
+        text: "I er i Tyskland! Sådan siger du 'cheeseburger' på tysk: 'Cheeseburger' — det hedder faktisk (næsten) det samme! Prøv at sige 'Ein Cheeseburger, bitte' (én cheeseburger, tak) næste gang I bestiller mad.",
+      },
     ],
   },
   {
     id: "hammoor",
-    name: "Hammoor",
-    short: "Ladestop 1",
+    name: "Omkring Hammoor",
+    short: "Aftensmad og opladning",
     lat: 53.7800,
     lon: 10.4000,
     scheduledTime: "2026-07-17T18:30:00+02:00",
@@ -103,8 +107,8 @@ export const waypoints: Waypoint[] = [
   },
   {
     id: "guxhagen",
-    name: "Guxhagen",
-    short: "Aftensmad & ladestop",
+    name: "Omkring Guxhagen",
+    short: "Opladning og kaffe",
     lat: 51.2130,
     lon: 9.5350,
     scheduledTime: "2026-07-17T21:30:00+02:00",
@@ -124,8 +128,8 @@ export const waypoints: Waypoint[] = [
   },
   {
     id: "ellwangen",
-    name: "Ellwangen",
-    short: "Natladestop",
+    name: "Omkring Ellwangen",
+    short: "Opladning og kaffe",
     lat: 48.9620,
     lon: 10.1280,
     scheduledTime: "2026-07-18T01:15:00+02:00",
@@ -249,6 +253,10 @@ export const waypoints: Waypoint[] = [
       {
         emoji: "🍨",
         text: `Hvis 1 is = 1 km, skal jeres Kona "spise" hele ${fmt(ICE_CREAMS_FOR_WHOLE_TRIP)} is for at køre fra Helsingør til Stresa! Held og lykke med at spise jeres andel her ved søen 😋`,
+      },
+      {
+        emoji: "🍔",
+        text: "I er i Italien! Sådan siger du 'cheeseburger' på italiensk: 'Cheeseburger'! Men is hedder 'gelato' — det bliver nyttigt at kunne lige her ved søen 🍦.",
       },
     ],
   },

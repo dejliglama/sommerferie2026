@@ -4,6 +4,7 @@ import { projectOntoRoute, computeEta, formatDuration, formatClock, type EtaResu
 import { pathPoint, computeDisplayT, TOTAL_SVG_HEIGHT, PATH_WIDTH } from "../lib/pathShape";
 import { buildRoadSegments } from "../lib/pathDayNight";
 import { isNight } from "../lib/daynight";
+import { buildSkyGradientStops } from "../lib/skyColor";
 import { MedievalTown, HotelZzz, SnowMountain, Lake } from "../components/RouteDoodles";
 import type { PlayerPosition } from "../lib/trip";
 
@@ -17,8 +18,9 @@ interface Props {
 
 const waypointT = waypoints.map((_, i) => cumulativeDistances[i] / totalDistanceKm);
 // Minimumsafstand mellem waypoint-mærker på kortet, kun til visning (se computeDisplayT).
-const MIN_WAYPOINT_GAP_T = 0.063;
+const MIN_WAYPOINT_GAP_T = 0.071;
 const waypointDisplayT = computeDisplayT(waypointT, MIN_WAYPOINT_GAP_T);
+const skyGradientStops = buildSkyGradientStops();
 
 // Lidt "forspring" så et fun fact låses op, lige før man præcist rammer punktet på GPS.
 const UNLOCK_BUFFER = 0.03;
@@ -139,11 +141,6 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
         <p className="locked-hint">🔒 Kør lidt længere, så låses denne fun fact op!</p>
       )}
 
-      <div className="daynight-legend">
-        <span><i className="legend-swatch legend-day" /> ☀️ Dag (07-20)</span>
-        <span><i className="legend-swatch legend-night" /> 🌙 Nat (20-07)</span>
-      </div>
-
       <div className="svg-scroll-wrap" ref={svgWrapRef}>
         <svg
           viewBox={`0 0 ${PATH_WIDTH} ${TOTAL_SVG_HEIGHT}`}
@@ -152,6 +149,15 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
           className="path-svg"
           preserveAspectRatio="xMidYMin meet"
         >
+          <defs>
+            <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
+              {skyGradientStops.map((stop, i) => (
+                <stop key={i} offset={stop.offset} stopColor={stop.color} />
+              ))}
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width={PATH_WIDTH} height={TOTAL_SVG_HEIGHT} fill="url(#skyGradient)" />
+
           <ellipse
             cx={(ferryStartPt.x + ferryEndPt.x) / 2}
             cy={(ferryStartPt.y + ferryEndPt.y) / 2}
@@ -209,7 +215,10 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
                 <text textAnchor="middle" dy="50" fontSize="17" className="waypoint-label">
                   {wp.name}
                 </text>
-                <text textAnchor="middle" dy="69" fontSize="14" className="waypoint-time">
+                <text textAnchor="middle" dy="67" fontSize="13" className="waypoint-short">
+                  {wp.short}
+                </text>
+                <text textAnchor="middle" dy="84" fontSize="14" className="waypoint-time">
                   {wpNight ? "🌙" : "☀️"} ca. {formatClock(new Date(wp.scheduledTime))}
                 </text>
                 {hasFacts && (

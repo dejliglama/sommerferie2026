@@ -25,8 +25,9 @@ const FERRY_LEG_INDEX = waypoints.findIndex((w) => w.id === "rodbyhavn");
 export const FERRY_T_START = waypointT[FERRY_LEG_INDEX];
 export const FERRY_T_END = waypointT[FERRY_LEG_INDEX + 1];
 
-// Finder dag/nat-status et sted midt mellem to waypoints (t = 0..1 langs hele ruten).
-function nightAtT(t: number): boolean {
+// Finder det (interpolerede) klokkeslæt et sted midt mellem to waypoints (t = 0..1 langs hele ruten).
+// Ophold (se legIsStay) "fryser" tiden ved nærmeste endepunkt i stedet for at feje gennem hele opholdet.
+export function timeAtT(t: number): Date {
   let i = 0;
   while (i < waypointT.length - 2 && waypointT[i + 1] < t) i++;
   const t0 = waypointT[i];
@@ -34,10 +35,13 @@ function nightAtT(t: number): boolean {
   const f = t1 === t0 ? 0 : (t - t0) / (t1 - t0);
 
   if (legIsStay[i]) {
-    return isNight(new Date(f < 0.5 ? waypointTimesMs[i] : waypointTimesMs[i + 1]));
+    return new Date(f < 0.5 ? waypointTimesMs[i] : waypointTimesMs[i + 1]);
   }
-  const time = new Date(waypointTimesMs[i] + f * (waypointTimesMs[i + 1] - waypointTimesMs[i]));
-  return isNight(time);
+  return new Date(waypointTimesMs[i] + f * (waypointTimesMs[i + 1] - waypointTimesMs[i]));
+}
+
+function nightAtT(t: number): boolean {
+  return isNight(timeAtT(t));
 }
 
 export type RoadSegmentKind = "day" | "night" | "ferry";
