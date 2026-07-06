@@ -5,13 +5,15 @@ type RGB = [number, number, number];
 
 // Nøgle-farver for himlen hen over et helt døgn — dæmpet dyb blå om natten,
 // varm morgenrøde omkring daggry, og den lyse dag-himmel resten af tiden.
+// Nattekørslen varer ved gennem Hohenems (07:30), morgenrøden topper på vej
+// mod Chur, og er blevet til fuld dag PRÆCIS ved Chur (09:30) — derfra sover
+// familien resten af natten væk, så det er dag hele vejen til Stresa.
 const KEYFRAMES: { hour: number; color: RGB }[] = [
   { hour: 0, color: [23, 28, 56] }, // dyb nat
-  { hour: 5, color: [23, 28, 56] }, // stadig dyb nat
-  { hour: 6.2, color: [95, 70, 105] }, // daggry begynder
-  { hour: 6.8, color: [255, 148, 118] }, // morgenrøde
-  { hour: 8, color: [190, 216, 220] }, // blødt op mod dagslys
-  { hour: 9.5, color: [126, 200, 227] }, // fuld dag
+  { hour: 6.5, color: [23, 28, 56] }, // stadig dyb nat hen mod Hohenems
+  { hour: 7.5, color: [95, 70, 105] }, // daggry begynder omkring Hohenems
+  { hour: 8.5, color: [255, 148, 118] }, // morgenrøde på vej mod Chur
+  { hour: 9.5, color: [126, 200, 227] }, // fuld dag, præcis ved Chur
   { hour: 17.5, color: [126, 200, 227] }, // stadig dag
   { hour: 19, color: [235, 160, 118] }, // aftenvarme
   { hour: 20.3, color: [90, 70, 110] }, // dæmpet skumring
