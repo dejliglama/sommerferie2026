@@ -86,11 +86,12 @@ export function subscribePositions(cb: (positions: PlayerPosition[]) => void): U
 export async function bumpCounter(
   uid: string,
   name: string,
-  field: "iceCream" | "tisse"
+  field: "iceCream" | "tisse",
+  delta: 1 | -1 = 1
 ): Promise<void> {
   await setDoc(
     doc(countersCol(), uid),
-    { name, [field]: increment(1) },
+    { name, [field]: increment(delta) },
     { merge: true }
   );
 }

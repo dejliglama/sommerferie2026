@@ -77,13 +77,16 @@ export default function App() {
     });
   }
 
-  function handleBump(field: "iceCream" | "tisse") {
+  function handleBump(field: "iceCream" | "tisse", delta: 1 | -1 = 1) {
     if (!uid || !player) return;
-    bumpCounter(uid, player.name, field).catch(() => {});
+    const existing = counters.find((c) => c.uid === uid);
+    if (delta < 0 && (!existing || existing[field] <= 0)) return;
+
+    bumpCounter(uid, player.name, field, delta).catch(() => {});
     setCounters((prev) => {
-      const existing = prev.find((c) => c.uid === uid);
-      if (existing) {
-        return prev.map((c) => (c.uid === uid ? { ...c, [field]: c[field] + 1 } : c));
+      const found = prev.find((c) => c.uid === uid);
+      if (found) {
+        return prev.map((c) => (c.uid === uid ? { ...c, [field]: Math.max(0, c[field] + delta) } : c));
       }
       return [...prev, { uid, name: player.name, iceCream: field === "iceCream" ? 1 : 0, tisse: field === "tisse" ? 1 : 0 }];
     });

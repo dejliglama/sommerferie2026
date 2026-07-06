@@ -592,6 +592,11 @@ button {
   font-weight: 800;
 }
 
+.counter-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
 .counter-btn {
   background: var(--primary);
   color: white;
@@ -600,6 +605,16 @@ button {
   padding: 14px 18px;
   font-weight: 700;
   font-size: 1rem;
+}
+
+.counter-btn-minus {
+  background: #eee;
+  color: var(--text);
+  padding: 14px 16px;
+}
+
+.counter-btn-minus:disabled {
+  opacity: 0.4;
 }
 
 .family-total {
