@@ -35,6 +35,14 @@ const WAYPOINT_DOODLES: Record<string, { render: () => ReactNode; dx: number; dy
   lagomaggiore: [{ render: () => <Lake />, dx: -58, dy: 5 }],
 };
 
+// Lille flag-badge ved det første stop i hvert nyt land på ruten (Tyskland får sin
+// egen fra selve waypoint-emojiet ved Puttgarden, så den er ikke gentaget her).
+const COUNTRY_BADGES: Record<string, string> = {
+  hohenems: "🇦🇹",
+  chur: "🇨🇭",
+  lagomaggiore: "🇮🇹",
+};
+
 // Vand-illustrationen skal forbinde de VISTE mærker (display-t), ikke den sande t —
 // ellers passer den ikke, når Rødbyhavn/Puttgarden bliver skubbet fra hinanden for læsbarhed.
 const RODBYHAVN_INDEX = waypoints.findIndex((w) => w.id === "rodbyhavn");
@@ -225,6 +233,14 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
                   <text textAnchor="middle" x="24" y="-22" fontSize="21" className="fact-badge">
                     {unlocked ? "💡" : "🔒"}
                   </text>
+                )}
+                {COUNTRY_BADGES[wp.id] && (
+                  <g transform="translate(-24, -22)">
+                    <circle r="13" className="country-badge-bg" />
+                    <text textAnchor="middle" dy="5" fontSize="15">
+                      {COUNTRY_BADGES[wp.id]}
+                    </text>
+                  </g>
                 )}
               </g>
             );

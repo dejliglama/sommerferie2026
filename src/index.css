@@ -492,6 +492,12 @@ button {
   }
 }
 
+.country-badge-bg {
+  fill: white;
+  stroke: var(--secondary);
+  stroke-width: 2;
+}
+
 .locked-hint {
   text-align: center;
   background: #fff4d6;
