@@ -11,7 +11,7 @@ interface Props {
 const COUNTER_CONFIG: { field: CounterField; emoji: string; label: string; buttonLabel: string }[] = [
   { field: "iceCream", emoji: "🍦", label: "Dine is", buttonLabel: "IS" },
   { field: "tisse", emoji: "🚽", label: "Dine tisse-pauser", buttonLabel: "TISSE" },
-  { field: "coffee", emoji: "☕", label: "Dine kaffe-pauser", buttonLabel: "KAFFE" },
+  { field: "coffee", emoji: "☕", label: "Dine kaffer", buttonLabel: "KAFFE" },
   { field: "snack", emoji: "🍪", label: "Dine slik/snacks", buttonLabel: "SLIK" },
 ];
 
