@@ -13,6 +13,7 @@ const COUNTER_CONFIG: { field: CounterField; emoji: string; label: string; butto
   { field: "tisse", emoji: "🚽", label: "Dine tisse-pauser", buttonLabel: "TISSE" },
   { field: "coffee", emoji: "☕", label: "Dine kaffer", buttonLabel: "KAFFE" },
   { field: "snack", emoji: "🍪", label: "Dine slik/snacks", buttonLabel: "SLIK" },
+  { field: "pokemon", emoji: "🎾", label: "Dine fangede pokémon", buttonLabel: "POKÉMON" },
 ];
 
 export default function Games({ myUid, myEmoji, counters, onBump }: Props) {
@@ -65,7 +66,7 @@ export default function Games({ myUid, myEmoji, counters, onBump }: Props) {
                   {c.uid === myUid ? myEmoji : "👤"} {c.name}
                 </span>
                 <span>
-                  🍦 {c.iceCream} · 🚽 {c.tisse} · ☕ {c.coffee} · 🍪 {c.snack}
+                  🍦 {c.iceCream} · 🚽 {c.tisse} · ☕ {c.coffee} · 🍪 {c.snack} · 🎾 {c.pokemon}
                 </span>
               </li>
             ))}

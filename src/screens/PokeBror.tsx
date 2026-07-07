@@ -1,58 +1,99 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { pokemonifyImage, TYPE_INFO, type PokemonType } from "../lib/pokemonify";
+import { loadPokedex, savePokedex, MAX_POKEMON, type CaughtPokemon } from "../lib/pokedex";
 
-const POKE_EMOJIS = ["👉", "💥", "😆", "🫵", "😵", "🤪"];
-const MAX_POKES_FOR_SQUISH = 25;
-
-interface Bubble {
-  id: number;
-  x: number;
-  y: number;
-  emoji: string;
+interface Props {
+  onCatch?: () => void;
 }
 
-export default function PokeBror() {
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [pokeCount, setPokeCount] = useState(0);
-  const [shakeKey, setShakeKey] = useState(0);
-  const [bubbles, setBubbles] = useState<Bubble[]>([]);
+type Phase = "idle" | "throwing" | "shaking" | "caught" | "escaped";
+
+interface Encounter {
+  dataUrl: string;
+  type: PokemonType;
+  name: string;
+  hp: number;
+}
+
+const CATCH_CHANCE = 0.75;
+
+export default function PokeBror({ onCatch }: Props) {
+  const [caught, setCaught] = useState<CaughtPokemon[]>(() => loadPokedex());
+  const [encounter, setEncounter] = useState<Encounter | null>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const bubbleId = useRef(0);
+
+  useEffect(() => {
+    savePokedex(caught);
+  }, [caught]);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
-    setPhotoUrl(url);
-    setPokeCount(0);
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 360;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const result = pokemonifyImage(canvas);
+      setEncounter({ dataUrl: result.dataUrl, type: result.type, name: result.name, hp: result.hp });
+      setPhase("idle");
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+    e.target.value = "";
   }
 
-  function poke(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const id = bubbleId.current++;
-    const emoji = POKE_EMOJIS[Math.floor(Math.random() * POKE_EMOJIS.length)];
-    setBubbles((b) => [...b, { id, x, y, emoji }]);
-    setTimeout(() => setBubbles((b) => b.filter((bub) => bub.id !== id)), 800);
-    setPokeCount((c) => Math.min(c + 1, MAX_POKES_FOR_SQUISH));
-    setShakeKey((k) => k + 1);
+  function throwBall() {
+    if (!encounter || phase === "throwing" || phase === "shaking") return;
+    setPhase("throwing");
+    setTimeout(() => {
+      setPhase("shaking");
+      setTimeout(() => {
+        const success = Math.random() < CATCH_CHANCE;
+        if (success) {
+          setPhase("caught");
+          setCaught((prev) =>
+            [
+              ...prev,
+              {
+                id: `${Date.now()}`,
+                dataUrl: encounter.dataUrl,
+                name: encounter.name,
+                type: encounter.type,
+                hp: encounter.hp,
+                caughtAt: Date.now(),
+              },
+            ].slice(0, MAX_POKEMON)
+          );
+          onCatch?.();
+        } else {
+          setPhase("escaped");
+        }
+      }, 900);
+    }, 500);
   }
 
-  function reset() {
-    setPokeCount(0);
-    setPhotoUrl(null);
+  function nextEncounter() {
+    setEncounter(null);
+    setPhase("idle");
   }
 
-  const scaleX = 1 + (pokeCount / MAX_POKES_FOR_SQUISH) * 0.6;
-  const scaleY = Math.max(0.25, 1 - (pokeCount / MAX_POKES_FOR_SQUISH) * 0.75);
-  const wiggle = (pokeCount % 2 === 0 ? 1 : -1) * Math.min(pokeCount, 8);
+  const pokedexFull = caught.length >= MAX_POKEMON;
 
   return (
     <div className="screen pokebror-screen">
-      <h2>🫵 PokeBror</h2>
-      <p className="instructions">Tag et billede af din bror og prik løs på ham!</p>
+      <h2>🎾 PokeBror</h2>
+      <p className="instructions">
+        Tag et billede af din bror (eller et dyr!) — det bliver til en vild pokémon, som du skal fange med en Pokéball!
+      </p>
 
-      {!photoUrl && (
+      {!encounter && !pokedexFull && (
         <>
           <input
             ref={fileInputRef}
@@ -63,37 +104,86 @@ export default function PokeBror() {
             style={{ display: "none" }}
           />
           <button className="big-button primary" onClick={() => fileInputRef.current?.click()}>
-            📸 Tag billede af bror
+            📸 Tag billede
           </button>
         </>
       )}
 
-      {photoUrl && (
-        <>
-          <div className="poke-count-badge">Antal prik: {pokeCount}</div>
-          <div className="poke-stage" onClick={poke}>
-            <img
-              key={shakeKey}
-              src={photoUrl}
-              alt="Bror"
-              className="poke-image"
-              style={{
-                transform: `scale(${scaleX}, ${scaleY}) rotate(${wiggle}deg)`,
-              }}
-            />
-            {bubbles.map((b) => (
-              <span key={b.id} className="poke-bubble" style={{ left: b.x, top: b.y }}>
-                {b.emoji}
-              </span>
+      {!encounter && pokedexFull && (
+        <p className="pokedex-full-text">🎉 Pokédex fuld! Du har fanget alle {MAX_POKEMON} pokémon.</p>
+      )}
+
+      {encounter && (
+        <div className="encounter-wrap">
+          <div
+            className={`encounter-card ${phase === "shaking" ? "shaking" : ""} ${phase === "caught" ? "caught-flash" : ""}`}
+            style={{ borderColor: TYPE_INFO[encounter.type].color }}
+          >
+            <div className="encounter-type-badge" style={{ background: TYPE_INFO[encounter.type].color }}>
+              {TYPE_INFO[encounter.type].emoji} {encounter.type}
+            </div>
+            <img src={encounter.dataUrl} alt={encounter.name} className="encounter-image" />
+            <div className="encounter-name">{encounter.name}</div>
+            <div className="encounter-hp">KP {encounter.hp}</div>
+            {phase === "throwing" && <span className="pokeball-throw">⚾</span>}
+          </div>
+
+          {phase === "idle" && (
+            <button className="big-button primary" onClick={throwBall}>
+              ⚾ Kast Pokéball!
+            </button>
+          )}
+          {phase === "throwing" && (
+            <button className="big-button primary" disabled>
+              🎯 Kaster...
+            </button>
+          )}
+          {phase === "shaking" && (
+            <button className="big-button primary" disabled>
+              📦 Ryster...
+            </button>
+          )}
+
+          {phase === "caught" && (
+            <>
+              <p className="catch-result caught">🎉 Fanget! {encounter.name} er nu i din Pokédex!</p>
+              <button className="big-button primary" onClick={nextEncounter}>
+                {pokedexFull ? "Se Pokédex" : "📸 Fang en til"}
+              </button>
+            </>
+          )}
+
+          {phase === "escaped" && (
+            <>
+              <p className="catch-result escaped">💨 Den slap væk! Prøv igen?</p>
+              <div className="button-row">
+                <button className="big-button primary" onClick={throwBall}>
+                  ⚾ Kast igen
+                </button>
+                <button className="big-button secondary" onClick={nextEncounter}>
+                  Giv op
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {caught.length > 0 && (
+        <div className="pokedex-gallery">
+          <h3>
+            Din Pokédex ({caught.length}/{MAX_POKEMON})
+          </h3>
+          <div className="pokedex-grid">
+            {caught.map((p) => (
+              <div key={p.id} className="pokedex-item" style={{ borderColor: TYPE_INFO[p.type].color }}>
+                <img src={p.dataUrl} alt={p.name} />
+                <span className="pokedex-item-name">{p.name}</span>
+                <span className="pokedex-item-type">{TYPE_INFO[p.type].emoji}</span>
+              </div>
             ))}
           </div>
-          {pokeCount >= MAX_POKES_FOR_SQUISH && (
-            <p className="max-poke-text">😵‍💫 Han kan ikke blive mere flad!</p>
-          )}
-          <button className="big-button secondary" onClick={reset}>
-            🔄 Nyt billede
-          </button>
-        </>
+        </div>
       )}
     </div>
   );

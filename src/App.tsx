@@ -98,6 +98,7 @@ export default function App() {
           tisse: 0,
           coffee: 0,
           snack: 0,
+          pokemon: 0,
           [field]: 1,
         },
       ];
@@ -131,7 +132,7 @@ export default function App() {
         {tab === "games" && uid && (
           <Games myUid={uid} myName={player.name} myEmoji={player.emoji} counters={counters} onBump={handleBump} />
         )}
-        {tab === "poke" && <PokeBror />}
+        {tab === "poke" && <PokeBror onCatch={() => handleBump("pokemon", 1)} />}
         {tab === "color" && <ColorFace />}
       </div>
       <BottomNav active={tab} onChange={setTab} />

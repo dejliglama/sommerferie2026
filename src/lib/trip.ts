@@ -24,7 +24,7 @@ export interface PlayerPosition {
   updatedAt: number | null;
 }
 
-export type CounterField = "iceCream" | "tisse" | "coffee" | "snack";
+export type CounterField = "iceCream" | "tisse" | "coffee" | "snack" | "pokemon";
 
 export interface PlayerCounters {
   uid: string;
@@ -33,6 +33,7 @@ export interface PlayerCounters {
   tisse: number;
   coffee: number;
   snack: number;
+  pokemon: number;
 }
 
 // Disse hjælpere kaldes kun efter ensureAnonymousAuth() er lykkedes, hvilket
@@ -112,6 +113,7 @@ export function subscribeCounters(cb: (counters: PlayerCounters[]) => void): Uns
           tisse: data.tisse ?? 0,
           coffee: data.coffee ?? 0,
           snack: data.snack ?? 0,
+          pokemon: data.pokemon ?? 0,
         };
       })
     );
