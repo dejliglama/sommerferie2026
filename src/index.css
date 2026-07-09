@@ -660,6 +660,49 @@ button {
   font-size: 0.9rem;
 }
 
+.admin-panel {
+  background: #fff0f0;
+  border: 2px dashed #e07a7a;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+
+.admin-hint {
+  color: #8a5a5a;
+  font-size: 0.85rem;
+  margin: 4px 0 10px;
+}
+
+.admin-player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-player-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid #f0d5d5;
+  font-weight: 600;
+}
+
+.admin-delete-btn {
+  background: #d64545;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.admin-delete-btn:disabled {
+  opacity: 0.6;
+}
+
 /* ---------- PokeBror ---------- */
 .pokedex-full-text {
   text-align: center;
@@ -723,7 +766,9 @@ button {
 }
 
 .encounter-card.shaking {
-  animation: pokemon-shake 0.3s ease-in-out 3;
+  animation-name: pokemon-shake;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-in-out;
 }
 
 @keyframes pokemon-shake {
@@ -783,6 +828,10 @@ button {
 
 .catch-result.escaped {
   color: #b1500f;
+}
+
+.catch-result.fled {
+  color: #a02020;
 }
 
 .button-row {

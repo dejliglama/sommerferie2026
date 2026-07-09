@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  deleteDoc,
   onSnapshot,
   serverTimestamp,
   setDoc,
@@ -99,6 +100,16 @@ export async function bumpCounter(
     { name, [field]: increment(delta) },
     { merge: true }
   );
+}
+
+// Kun tilladt af Firestore-reglerne hvis man sletter sit eget dokument, eller
+// hvis ens eget spillernavn er "Far" (se firestore.rules).
+export async function deletePlayer(uid: string): Promise<void> {
+  await Promise.allSettled([
+    deleteDoc(doc(playersCol(), uid)),
+    deleteDoc(doc(positionsCol(), uid)),
+    deleteDoc(doc(countersCol(), uid)),
+  ]);
 }
 
 export function subscribeCounters(cb: (counters: PlayerCounters[]) => void): Unsubscribe {

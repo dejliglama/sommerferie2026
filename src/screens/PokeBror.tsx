@@ -6,7 +6,7 @@ interface Props {
   onCatch?: () => void;
 }
 
-type Phase = "idle" | "throwing" | "shaking" | "caught" | "escaped";
+type Phase = "idle" | "throwing" | "shaking" | "caught" | "escaped" | "fled";
 
 interface Encounter {
   dataUrl: string;
@@ -15,13 +15,19 @@ interface Encounter {
   hp: number;
 }
 
-const CATCH_CHANCE = 0.75;
+// Højere KP = sværere at fange. Spænder ca. 85% (lav KP) ned til 35% (høj KP).
+function catchChanceForHp(hp: number): number {
+  const t = Math.min(1, Math.max(0, (hp - 20) / 80));
+  return 0.85 - t * 0.5;
+}
 
 export default function PokeBror({ onCatch }: Props) {
   const [caught, setCaught] = useState<CaughtPokemon[]>(() => loadPokedex());
   const [encounter, setEncounter] = useState<Encounter | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
+  const [attempts, setAttempts] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const shakeCountRef = useRef(3);
 
   useEffect(() => {
     savePokedex(caught);
@@ -42,6 +48,7 @@ export default function PokeBror({ onCatch }: Props) {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       const result = pokemonifyImage(canvas);
       setEncounter({ dataUrl: result.dataUrl, type: result.type, name: result.name, hp: result.hp });
+      setAttempts(0);
       setPhase("idle");
       URL.revokeObjectURL(url);
     };
@@ -51,11 +58,22 @@ export default function PokeBror({ onCatch }: Props) {
 
   function throwBall() {
     if (!encounter || phase === "throwing" || phase === "shaking") return;
+    const attemptNumber = attempts;
+    setAttempts((a) => a + 1);
     setPhase("throwing");
+
     setTimeout(() => {
+      // Lidt varierende antal ryst — nogle kast afgøres hurtigt, andre trækker ud.
+      shakeCountRef.current = 2 + Math.floor(Math.random() * 3);
       setPhase("shaking");
+
       setTimeout(() => {
-        const success = Math.random() < CATCH_CHANCE;
+        const baseChance = catchChanceForHp(encounter.hp);
+        const decay = Math.pow(0.8, attemptNumber); // sværere for hvert nyt kast mod samme pokémon
+        const jitter = (Math.random() - 0.5) * 0.12;
+        const chance = Math.min(0.95, Math.max(0.05, baseChance * decay + jitter));
+        const success = Math.random() < chance;
+
         if (success) {
           setPhase("caught");
           setCaught((prev) =>
@@ -73,15 +91,18 @@ export default function PokeBror({ onCatch }: Props) {
           );
           onCatch?.();
         } else {
-          setPhase("escaped");
+          // Jo flere gange den er undsluppet, jo større chance for at den stikker helt af.
+          const fleeChance = 0.3 + attemptNumber * 0.15;
+          setPhase(Math.random() < fleeChance ? "fled" : "escaped");
         }
-      }, 900);
+      }, shakeCountRef.current * 320 + 200);
     }, 500);
   }
 
   function nextEncounter() {
     setEncounter(null);
     setPhase("idle");
+    setAttempts(0);
   }
 
   const pokedexFull = caught.length >= MAX_POKEMON;
@@ -117,7 +138,10 @@ export default function PokeBror({ onCatch }: Props) {
         <div className="encounter-wrap">
           <div
             className={`encounter-card ${phase === "shaking" ? "shaking" : ""} ${phase === "caught" ? "caught-flash" : ""}`}
-            style={{ borderColor: TYPE_INFO[encounter.type].color }}
+            style={{
+              borderColor: TYPE_INFO[encounter.type].color,
+              animationIterationCount: phase === "shaking" ? shakeCountRef.current : undefined,
+            }}
           >
             <div className="encounter-type-badge" style={{ background: TYPE_INFO[encounter.type].color }}>
               {TYPE_INFO[encounter.type].emoji} {encounter.type}
@@ -164,6 +188,15 @@ export default function PokeBror({ onCatch }: Props) {
                   Giv op
                 </button>
               </div>
+            </>
+          )}
+
+          {phase === "fled" && (
+            <>
+              <p className="catch-result fled">💨🏃 Den stak helt af! Den kommer ikke tilbage.</p>
+              <button className="big-button primary" onClick={nextEncounter}>
+                📸 Nyt billede
+              </button>
             </>
           )}
         </div>

@@ -10,10 +10,12 @@ import { ensureAnonymousAuth, firebaseConfigured } from "./lib/firebase";
 import { loadLocalPlayer, saveLocalPlayer, type LocalPlayer } from "./lib/localPlayer";
 import {
   joinAsPlayer,
+  subscribePlayers,
   subscribePositions,
   subscribeCounters,
   updateMyPosition,
   bumpCounter,
+  type Player,
   type PlayerPosition,
   type PlayerCounters,
   type CounterField,
@@ -25,6 +27,7 @@ export default function App() {
   const [player, setPlayer] = useState<LocalPlayer | null>(() => loadLocalPlayer());
   const [joining, setJoining] = useState(false);
   const [tab, setTab] = useState<Tab>("path");
+  const [players, setPlayers] = useState<Player[]>([]);
   const [positions, setPositions] = useState<PlayerPosition[]>([]);
   const [counters, setCounters] = useState<PlayerCounters[]>([]);
 
@@ -47,9 +50,11 @@ export default function App() {
 
   useEffect(() => {
     if (!uid) return;
+    const unsubPlayers = subscribePlayers(setPlayers);
     const unsubPos = subscribePositions(setPositions);
     const unsubCounters = subscribeCounters(setCounters);
     return () => {
+      unsubPlayers();
       unsubPos();
       unsubCounters();
     };
@@ -137,6 +142,7 @@ export default function App() {
             myEmoji={player.emoji}
             counters={counters}
             positions={positions}
+            players={players}
             onBump={handleBump}
           />
         )}

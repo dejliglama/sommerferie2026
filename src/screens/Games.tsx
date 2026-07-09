@@ -1,4 +1,5 @@
-import type { CounterField, PlayerCounters, PlayerPosition } from "../lib/trip";
+import { useState } from "react";
+import { deletePlayer, type CounterField, type Player, type PlayerCounters, type PlayerPosition } from "../lib/trip";
 import { countriesReached, countriesReachedList, TOTAL_COUNTRIES } from "../lib/countries";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
   myEmoji: string;
   counters: PlayerCounters[];
   positions: PlayerPosition[];
+  players: Player[];
   onBump: (field: CounterField, delta?: 1 | -1) => void;
 }
 
@@ -18,14 +20,29 @@ const COUNTER_CONFIG: { field: CounterField; emoji: string; label: string; butto
   { field: "pokemon", emoji: "🎾", label: "Dine fangede pokémon", buttonLabel: "POKÉMON" },
 ];
 
-export default function Games({ myUid, myEmoji, counters, positions, onBump }: Props) {
+export default function Games({ myUid, myEmoji, counters, positions, players, onBump }: Props) {
   const mine = counters.find((c) => c.uid === myUid);
+  const [deletingUid, setDeletingUid] = useState<string | null>(null);
 
   // Hele familien kører i samme bil, så "hvor mange lande" er ét fælles tal —
   // baseret på den længst fremme position nogen i familien har bekræftet.
   const familyProgress = positions.reduce((max, p) => Math.max(max, p.progressFraction ?? 0), 0);
   const countryCount = countriesReached(familyProgress);
   const countryFlags = countriesReachedList(familyProgress);
+
+  const isFar = myUid && players.find((p) => p.uid === myUid)?.name.trim().toLowerCase() === "far";
+
+  async function handleDeletePlayer(uid: string, name: string) {
+    if (!window.confirm(`Slet spilleren "${name}" og al deres data (position, tællere)? Dette kan ikke fortrydes.`)) {
+      return;
+    }
+    setDeletingUid(uid);
+    try {
+      await deletePlayer(uid);
+    } finally {
+      setDeletingUid(null);
+    }
+  }
 
   return (
     <div className="screen games-screen">
@@ -97,6 +114,31 @@ export default function Games({ myUid, myEmoji, counters, positions, onBump }: P
             ))}
         </ul>
       </div>
+
+      {isFar && (
+        <div className="admin-panel">
+          <h3>🛠️ Admin: Nulstil spillere</h3>
+          <p className="admin-hint">Kun synligt for dig, "Far". Sletning fjerner spilleren, deres position og tællere permanent.</p>
+          {players.length === 0 && <p className="admin-hint">Ingen spillere endnu.</p>}
+          <ul className="admin-player-list">
+            {players.map((p) => (
+              <li key={p.uid}>
+                <span>
+                  {p.emoji} {p.name}
+                  {p.uid === myUid && " (dig)"}
+                </span>
+                <button
+                  className="admin-delete-btn"
+                  onClick={() => handleDeletePlayer(p.uid, p.name)}
+                  disabled={deletingUid === p.uid}
+                >
+                  {deletingUid === p.uid ? "Sletter…" : "🗑️ Slet"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
