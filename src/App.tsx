@@ -3,6 +3,7 @@ import Login from "./screens/Login";
 import AdventurePath from "./screens/AdventurePath";
 import Games from "./screens/Games";
 import PokeBror from "./screens/PokeBror";
+import Quiz from "./screens/Quiz";
 import ColorFace from "./screens/ColorFace";
 import BottomNav, { type Tab } from "./components/BottomNav";
 import { ensureAnonymousAuth, firebaseConfigured } from "./lib/firebase";
@@ -140,6 +141,7 @@ export default function App() {
           />
         )}
         {tab === "poke" && <PokeBror onCatch={() => handleBump("pokemon", 1)} />}
+        {tab === "quiz" && <Quiz />}
         {tab === "color" && <ColorFace />}
       </div>
       <BottomNav active={tab} onChange={setTab} />

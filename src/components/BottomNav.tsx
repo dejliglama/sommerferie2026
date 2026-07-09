@@ -1,4 +1,4 @@
-export type Tab = "path" | "games" | "poke" | "color";
+export type Tab = "path" | "games" | "poke" | "quiz" | "color";
 
 interface Props {
   active: Tab;
@@ -8,7 +8,8 @@ interface Props {
 const TABS: { id: Tab; label: string; emoji: string }[] = [
   { id: "path", label: "Stien", emoji: "🗺️" },
   { id: "games", label: "Tællere", emoji: "🎮" },
-  { id: "poke", label: "PokeBror", emoji: "🫵" },
+  { id: "poke", label: "PokeBror", emoji: "🎾" },
+  { id: "quiz", label: "Quiz", emoji: "🧠" },
   { id: "color", label: "Farvelæg", emoji: "🎨" },
 ];
 

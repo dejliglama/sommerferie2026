@@ -22,7 +22,9 @@ export function buildPathD(steps = 300): string {
   return d;
 }
 
-export const TOTAL_SVG_HEIGHT = PATH_HEIGHT_PER_UNIT + 120;
+// +60 matcher toppens forspring i pathPoint, +130 giver plads til sidste waypoints
+// fulde tekstblok (navn + short + tid rækker ca. 104px ned fra centrum) uden beskæring.
+export const TOTAL_SVG_HEIGHT = PATH_HEIGHT_PER_UNIT + 60 + 130;
 
 // Nogle waypoints ligger meget tæt (eller oveni hinanden) i virkelig afstand langs ruten
 // (fx Viamala og Thusis). Til VISNING af mærker/labels presser vi dem fra hinanden med en
