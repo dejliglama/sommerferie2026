@@ -103,7 +103,7 @@ export default function ColorFace() {
             style={{ display: "none" }}
           />
           <button className="big-button primary" onClick={() => fileInputRef.current?.click()}>
-            🤳 Tag selfie
+            🤳 Tag et billede
           </button>
         </>
       )}
