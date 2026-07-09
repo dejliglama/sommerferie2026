@@ -130,7 +130,14 @@ export default function App() {
           />
         )}
         {tab === "games" && uid && (
-          <Games myUid={uid} myName={player.name} myEmoji={player.emoji} counters={counters} onBump={handleBump} />
+          <Games
+            myUid={uid}
+            myName={player.name}
+            myEmoji={player.emoji}
+            counters={counters}
+            positions={positions}
+            onBump={handleBump}
+          />
         )}
         {tab === "poke" && <PokeBror onCatch={() => handleBump("pokemon", 1)} />}
         {tab === "color" && <ColorFace />}

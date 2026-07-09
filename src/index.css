@@ -598,6 +598,16 @@ button {
   font-weight: 800;
 }
 
+.country-counter-card {
+  background: linear-gradient(135deg, #fff4d6, #ffe0c2);
+  border: 2px solid #ffb703;
+}
+
+.country-flags {
+  font-size: 1.1rem;
+  margin-top: 2px;
+}
+
 .counter-btn-group {
   display: flex;
   gap: 8px;

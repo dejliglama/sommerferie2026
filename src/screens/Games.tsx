@@ -1,10 +1,12 @@
-import type { CounterField, PlayerCounters } from "../lib/trip";
+import type { CounterField, PlayerCounters, PlayerPosition } from "../lib/trip";
+import { countriesReached, countriesReachedList, TOTAL_COUNTRIES } from "../lib/countries";
 
 interface Props {
   myUid: string;
   myName: string;
   myEmoji: string;
   counters: PlayerCounters[];
+  positions: PlayerPosition[];
   onBump: (field: CounterField, delta?: 1 | -1) => void;
 }
 
@@ -16,12 +18,29 @@ const COUNTER_CONFIG: { field: CounterField; emoji: string; label: string; butto
   { field: "pokemon", emoji: "🎾", label: "Dine fangede pokémon", buttonLabel: "POKÉMON" },
 ];
 
-export default function Games({ myUid, myEmoji, counters, onBump }: Props) {
+export default function Games({ myUid, myEmoji, counters, positions, onBump }: Props) {
   const mine = counters.find((c) => c.uid === myUid);
+
+  // Hele familien kører i samme bil, så "hvor mange lande" er ét fælles tal —
+  // baseret på den længst fremme position nogen i familien har bekræftet.
+  const familyProgress = positions.reduce((max, p) => Math.max(max, p.progressFraction ?? 0), 0);
+  const countryCount = countriesReached(familyProgress);
+  const countryFlags = countriesReachedList(familyProgress);
 
   return (
     <div className="screen games-screen">
       <h2>🎮 Rejse-tællere</h2>
+
+      <div className="counter-card country-counter-card">
+        <div className="counter-emoji">🌍</div>
+        <div className="counter-info">
+          <span className="counter-label">Lande på turen</span>
+          <span className="counter-number">
+            {countryCount}/{TOTAL_COUNTRIES}
+          </span>
+          <span className="country-flags">{countryFlags.map((c) => c.flag).join(" ")}</span>
+        </div>
+      </div>
 
       {COUNTER_CONFIG.map(({ field, emoji, label, buttonLabel }) => (
         <div className="counter-card" key={field}>
@@ -48,6 +67,12 @@ export default function Games({ myUid, myEmoji, counters, onBump }: Props) {
 
       <div className="family-total">
         <h3>Familie-total</h3>
+        <div className="family-total-row">
+          <span>🌍 Lande i alt</span>
+          <strong>
+            {countryCount}/{TOTAL_COUNTRIES}
+          </strong>
+        </div>
         {COUNTER_CONFIG.map(({ field, emoji, label }) => (
           <div className="family-total-row" key={field}>
             <span>
