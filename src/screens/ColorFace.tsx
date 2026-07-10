@@ -1,16 +1,19 @@
 import { useRef, useState } from "react";
 
 const COLORS = ["#e63946", "#f4a261", "#e9c46a", "#2a9d8f", "#264653", "#8338ec", "#ff70a6", "#ffffff", "#000000"];
+const MAX_HISTORY = 20;
 
 export default function ColorFace() {
   const [hasPhoto, setHasPhoto] = useState(false);
   const [color, setColor] = useState(COLORS[0]);
   const [brushSize, setBrushSize] = useState(10);
+  const [canUndo, setCanUndo] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const drawing = useRef(false);
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
+  const historyRef = useRef<ImageData[]>([]);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -27,17 +30,35 @@ export default function ColorFace() {
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       imageRef.current = img;
+      historyRef.current = [];
+      setCanUndo(false);
       setHasPhoto(true);
     };
     img.src = url;
   }
 
+  // Canvas'ens interne pixel-opløsning (canvas.width/height) matcher ikke nødvendigvis
+  // dens viste CSS-størrelse (rect.width/height), så vi skal skalere pointer-koordinaterne
+  // om — ellers tegner man ikke der, hvor fingeren rent faktisk er.
   function getPos(e: React.PointerEvent<HTMLCanvasElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const canvas = e.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
+
+  function pushHistory() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+    historyRef.current.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    if (historyRef.current.length > MAX_HISTORY) historyRef.current.shift();
+    setCanUndo(true);
   }
 
   function startDraw(e: React.PointerEvent<HTMLCanvasElement>) {
+    pushHistory();
     drawing.current = true;
     lastPoint.current = getPos(e);
   }
@@ -65,10 +86,20 @@ export default function ColorFace() {
     lastPoint.current = null;
   }
 
+  function undo() {
+    const canvas = canvasRef.current;
+    const last = historyRef.current.pop();
+    if (!canvas || !last) return;
+    const ctx = canvas.getContext("2d")!;
+    ctx.putImageData(last, 0, 0);
+    setCanUndo(historyRef.current.length > 0);
+  }
+
   function clearDrawing() {
     const canvas = canvasRef.current;
     const img = imageRef.current;
     if (!canvas || !img) return;
+    pushHistory();
     const ctx = canvas.getContext("2d")!;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   }
@@ -85,6 +116,8 @@ export default function ColorFace() {
   function retake() {
     setHasPhoto(false);
     imageRef.current = null;
+    historyRef.current = [];
+    setCanUndo(false);
   }
 
   return (
@@ -141,9 +174,14 @@ export default function ColorFace() {
             />
           </div>
           <div className="button-row">
+            <button className="big-button secondary" onClick={undo} disabled={!canUndo}>
+              ↩️ Fortryd streg
+            </button>
             <button className="big-button secondary" onClick={clearDrawing}>
               🧽 Ryd farver
             </button>
+          </div>
+          <div className="button-row">
             <button className="big-button secondary" onClick={save}>
               💾 Gem billede
             </button>

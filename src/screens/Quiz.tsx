@@ -76,7 +76,8 @@ export default function Quiz() {
             }
             return (
               <button key={i} className={optionClass} onClick={() => pickAnswer(i)} disabled={selected !== null}>
-                {option}
+                <span className="quiz-option-emoji">{option.emoji}</span>
+                <span className="quiz-option-text">{option.text}</span>
               </button>
             );
           })}
