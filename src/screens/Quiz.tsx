@@ -63,9 +63,7 @@ export default function Quiz() {
       </p>
 
       <div className="quiz-card">
-        <p className="quiz-question">
-          {question.emoji} {question.question}
-        </p>
+        <p className="quiz-question">{question.question}</p>
         <div className="quiz-options">
           {question.options.map((option, i) => {
             let optionClass = "quiz-option";

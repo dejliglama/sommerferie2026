@@ -5,19 +5,18 @@ export interface QuizOption {
 
 export interface QuizQuestion {
   id: string;
-  emoji: string;
   question: string;
   options: [QuizOption, QuizOption, QuizOption];
   correctIndex: 0 | 1 | 2;
 }
 
 // 40 spørgsmål bygget på de samme fun facts, I møder rundt om på ruten.
-// Både spørgsmål og hver svarmulighed har sit eget ikon, så det er nemt at
-// gætte med selvom man ikke kan læse hele teksten endnu.
+// Spørgsmålet selv har ikke noget ikon (det ville afsløre svaret for meget),
+// men hver svarmulighed har sit eget, så det er nemt at gætte med selvom man
+// ikke kan læse hele teksten endnu.
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: "kronborg",
-    emoji: "👻",
     question: "Hvad hedder slottet i Helsingør, som Shakespeare skrev om i \"Hamlet\"?",
     options: [
       { emoji: "🏰", text: "Kronborg Slot" },
@@ -28,7 +27,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "shakespeare",
-    emoji: "🎭",
     question: "Hvilket berømt skuespil foregår på Kronborg Slot?",
     options: [
       { emoji: "👑", text: "Hamlet" },
@@ -39,7 +37,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "femern",
-    emoji: "🚇",
     question: "Hvor lang bliver Femernbælt-tunnelen, som bygges der hvor I sejler med færgen?",
     options: [
       { emoji: "📏", text: "5 km" },
@@ -50,7 +47,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "femern-dybde",
-    emoji: "🌊",
     question: "Hvor mange meter under havet kommer Femernbælt-tunnelen til at ligge?",
     options: [
       { emoji: "🤏", text: "4 meter" },
@@ -61,7 +57,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "femern-lande",
-    emoji: "🌉",
     question: "Hvilke to lande forbinder Femernbælt-tunnelen?",
     options: [
       { emoji: "🇩🇰", text: "Danmark og Tyskland" },
@@ -72,7 +67,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "faerge-transport",
-    emoji: "🚢",
     question: "Hvordan kommer familien fra Danmark til Tyskland?",
     options: [
       { emoji: "✈️", text: "Med fly" },
@@ -83,7 +77,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "faerge-varighed",
-    emoji: "⏱️",
     question: "Hvor lang tid tager færgeturen fra Rødby til Puttgarden cirka?",
     options: [
       { emoji: "⚡", text: "5 minutter" },
@@ -94,7 +87,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "wunderland",
-    emoji: "🚂",
     question: "Hvad hedder verdens største modeljernbane, tæt på ruten ved Hamborg?",
     options: [
       { emoji: "🧱", text: "Legoland" },
@@ -105,7 +97,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "wunderland-by",
-    emoji: "🏙️",
     question: "I hvilken tysk by ligger Miniatur Wunderland?",
     options: [
       { emoji: "🏰", text: "Berlin" },
@@ -116,7 +107,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "wunderland-biler",
-    emoji: "🚙",
     question: "Hvor mange miniature-biler er der cirka i Miniatur Wunderland?",
     options: [
       { emoji: "🔟", text: "Ca. 10" },
@@ -127,7 +117,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "wunderland-traeer",
-    emoji: "🌳",
     question: "Hvor mange miniature-træer er der cirka i Miniatur Wunderland?",
     options: [
       { emoji: "🌱", text: "Ca. 100" },
@@ -138,7 +127,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "vogelflug-dyr",
-    emoji: "🐦",
     question: "Hvilke dyr har givet navn til ruten \"Vogelfluglinie\", I kører på?",
     options: [
       { emoji: "🐦", text: "Fugle" },
@@ -149,7 +137,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "slotte",
-    emoji: "🏰",
     question: "Cirka hvor mange slotte og borge har Tyskland?",
     options: [
       { emoji: "🏰", text: "Over 25.000" },
@@ -160,7 +147,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "maerchenstrasse",
-    emoji: "📖",
     question: "Hvad hedder den tyske vej, I kører langs, som følger eventyrenes spor?",
     options: [
       { emoji: "🐉", text: "Dragevejen" },
@@ -171,7 +157,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "dukkehuse",
-    emoji: "🏠",
     question: "Hvor mange dukkehuse er der i museet i Ellwangen?",
     options: [
       { emoji: "1️⃣", text: "5" },
@@ -182,7 +167,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "ellwangen-figurer",
-    emoji: "👼",
     question: "Hvor mange figurer er der i de kæmpe julekrybber i Ellwangens slot?",
     options: [
       { emoji: "🔟", text: "Over 10" },
@@ -193,7 +177,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "ulm-taarn",
-    emoji: "⛪",
     question: "Hvad kan I se højt oppe over byen Ulm, som I kører forbi?",
     options: [
       { emoji: "⛪", text: "Et kæmpe kirketårn" },
@@ -204,7 +187,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "hohenems-land",
-    emoji: "🥐",
     question: "Hvilket land ligger Hohenems, hvor I spiser morgenmad, i?",
     options: [
       { emoji: "🇦🇹", text: "Østrig" },
@@ -215,7 +197,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "chur-land",
-    emoji: "🏔️",
     question: "Hvilket land ligger byen Chur i?",
     options: [
       { emoji: "🇨🇭", text: "Schweiz" },
@@ -226,7 +207,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "chur-urban-golf",
-    emoji: "⛳",
     question: "Hvad kan familien spille i gaderne i Chur?",
     options: [
       { emoji: "⛳", text: "Urban Golf" },
@@ -237,7 +217,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "chur-gaestekort",
-    emoji: "🎫",
     question: "Hvad får familien gratis, når de tjekker ind på hotellet i Chur?",
     options: [
       { emoji: "🎫", text: "Et gæstekort med rabatter" },
@@ -248,7 +227,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "viamala-navn",
-    emoji: "😱",
     question: "Hvad betyder navnet \"Viamala\"?",
     options: [
       { emoji: "😈", text: "Den onde vej" },
@@ -259,7 +237,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "viamala-trin",
-    emoji: "🪨",
     question: "Hvor mange trappetrin går I ned i Viamala-kløften?",
     options: [
       { emoji: "🔟", text: "50" },
@@ -270,7 +247,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "viamala-hoejde",
-    emoji: "🧗",
     question: "Hvor høje er klippevæggene i Viamala-kløften helt oppe?",
     options: [
       { emoji: "🤏", text: "Op til 30 meter" },
@@ -281,7 +257,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "thusis-opladning",
-    emoji: "🔋",
     question: "Hvad gør familien i Thusis, lige før de kører op over bjergpasset?",
     options: [
       { emoji: "🔋", text: "Lader bilen op" },
@@ -292,7 +267,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "sanbernardino-hoejde",
-    emoji: "⛰️",
     question: "Hvor højt oppe ligger San Bernardino-passet?",
     options: [
       { emoji: "🏠", text: "500 meter" },
@@ -303,7 +277,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "sanbernardino-soe",
-    emoji: "🏞️",
     question: "Hvad hedder bjergsøen, familien besøger på toppen af San Bernardino-passet?",
     options: [
       { emoji: "🏞️", text: "Lago Moesola" },
@@ -314,7 +287,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "sanbernardino-frokost",
-    emoji: "🍽️",
     question: "Hvor spiser familien frokost på toppen af San Bernardino-passet?",
     options: [
       { emoji: "🍽️", text: "På gæstgiveriet Ospizio San Bernardino" },
@@ -325,7 +297,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "lagomaggiore-navn",
-    emoji: "🍦",
     question: "Hvad hedder søen, I får is ved, lige før I når Stresa?",
     options: [
       { emoji: "🌊", text: "Gardasøen" },
@@ -336,7 +307,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "gelato",
-    emoji: "🍨",
     question: "Hvad betyder \"gelato\" på italiensk?",
     options: [
       { emoji: "🎂", text: "Kage" },
@@ -347,7 +317,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "isolabella-terrasser",
-    emoji: "🎂",
     question: "Hvor mange terrasser har den kæmpe have på Isola Bella?",
     options: [
       { emoji: "2️⃣", text: "2" },
@@ -358,7 +327,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "isolabella-form",
-    emoji: "🎂",
     question: "Hvad ligner haven på Isola Bella, med sine mange terrasser?",
     options: [
       { emoji: "🎂", text: "En kæmpe bryllupskage" },
@@ -369,7 +337,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "stresa-land",
-    emoji: "🇮🇹",
     question: "Hvilket land ligger Stresa, rejsens slutmål, i?",
     options: [
       { emoji: "🇮🇹", text: "Italien" },
@@ -380,7 +347,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "bil-type",
-    emoji: "🚗",
     question: "Hvad slags bil kører familien i på hele turen?",
     options: [
       { emoji: "⚡", text: "En elbil" },
@@ -391,7 +357,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "antal-lande",
-    emoji: "🌍",
     question: "Hvor mange lande kører familien igennem på hele turen?",
     options: [
       { emoji: "3️⃣", text: "3 lande" },
@@ -402,7 +367,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "ikke-land",
-    emoji: "🚫",
     question: "Hvilket land kører familien IKKE igennem på turen?",
     options: [
       { emoji: "🇫🇷", text: "Frankrig" },
@@ -413,7 +377,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "afgangsdag",
-    emoji: "📅",
     question: "Hvilken ugedag kører familien hjemmefra?",
     options: [
       { emoji: "🌞", text: "Fredag" },
@@ -424,7 +387,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "koereturens-laengde",
-    emoji: "📏",
     question: "Hvor lang er hele køreturen fra Helsingør til Stresa cirka?",
     options: [
       { emoji: "🚲", text: "Ca. 100 km" },
@@ -435,7 +397,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "is-antal",
-    emoji: "🍨",
     question: "Hvis 1 is svarer til 1 km, hvor mange is skal bilen \"spise\" på hele turen?",
     options: [
       { emoji: "🍦", text: "Ca. 10 is" },
@@ -446,7 +407,6 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: "hjul-omdrejninger",
-    emoji: "🛞",
     question: "Cirka hvor mange gange drejer hvert hjul rundt på hele turen?",
     options: [
       { emoji: "💯", text: "Ca. 100 gange" },
