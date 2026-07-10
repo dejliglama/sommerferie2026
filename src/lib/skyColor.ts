@@ -1,5 +1,7 @@
-import { timeAtT } from "./pathDayNight";
+import { timeAtT, CHUR_T } from "./pathDayNight";
 import { tripLocalHour } from "./daynight";
+
+const DAY_HOUR = 12; // bruges til at tvinge fuld dagsfarve efter Chur
 
 type RGB = [number, number, number];
 
@@ -53,7 +55,7 @@ export function buildSkyGradientStops(steps = 200): SkyStop[] {
   const stops: SkyStop[] = [];
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    const hour = tripLocalHour(timeAtT(t));
+    const hour = t >= CHUR_T ? DAY_HOUR : tripLocalHour(timeAtT(t));
     stops.push({ offset: t, color: colorForHour(hour) });
   }
   return stops;

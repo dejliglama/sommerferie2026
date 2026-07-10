@@ -25,6 +25,10 @@ const FERRY_LEG_INDEX = waypoints.findIndex((w) => w.id === "rodbyhavn");
 export const FERRY_T_START = waypointT[FERRY_LEG_INDEX];
 export const FERRY_T_END = waypointT[FERRY_LEG_INDEX + 1];
 
+// Familien sover i Chur, og hele resten af turen (søndag) foregår om dagen — det
+// gælder ubetinget, uanset hvad de enkelte klokkeslæt ellers regner ud til.
+export const CHUR_T = waypointT[waypoints.findIndex((w) => w.id === "chur")];
+
 // Finder det (interpolerede) klokkeslæt et sted midt mellem to waypoints (t = 0..1 langs hele ruten).
 // Ophold (se legIsStay) "fryser" tiden ved nærmeste endepunkt i stedet for at feje gennem hele opholdet.
 export function timeAtT(t: number): Date {
@@ -53,6 +57,7 @@ export interface RoadSegment {
 
 function kindAtT(t: number): RoadSegmentKind {
   if (t >= FERRY_T_START && t <= FERRY_T_END) return "ferry";
+  if (t >= CHUR_T) return "day";
   return nightAtT(t) ? "night" : "day";
 }
 

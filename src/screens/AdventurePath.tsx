@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { waypoints, cumulativeDistances, totalDistanceKm, type Waypoint } from "../data/route";
 import { projectOntoRoute, computeEta, formatDuration, formatClock, type EtaResult } from "../lib/geo";
 import { pathPoint, computeDisplayT, TOTAL_SVG_HEIGHT, PATH_WIDTH } from "../lib/pathShape";
-import { buildRoadSegments } from "../lib/pathDayNight";
+import { buildRoadSegments, CHUR_T } from "../lib/pathDayNight";
 import { isNight } from "../lib/daynight";
 import { buildSkyGradientStops } from "../lib/skyColor";
 import { MedievalTown, HotelZzz, SnowMountain, Lake } from "../components/RouteDoodles";
@@ -203,7 +203,7 @@ export default function AdventurePath({ myUid, myEmoji, positions, onLocate }: P
             const { x, y } = pathPoint(waypointDisplayT[i]);
             const unlocked = isUnlocked(i);
             const hasFacts = Boolean(wp.funFacts?.length);
-            const wpNight = isNight(new Date(wp.scheduledTime));
+            const wpNight = waypointT[i] < CHUR_T && isNight(new Date(wp.scheduledTime));
             return (
               <g
                 key={wp.id}

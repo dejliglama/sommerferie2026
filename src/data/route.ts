@@ -96,7 +96,7 @@ export const waypoints: Waypoint[] = [
     lon: 10.4000,
     scheduledTime: "2026-07-17T18:30:00+02:00",
     type: "charge",
-    emoji: "🔌",
+    emoji: "🍔",
     description: "IONITY Buddikate Ost — 45-50 min",
     funFacts: [
       {
@@ -113,7 +113,7 @@ export const waypoints: Waypoint[] = [
     lon: 9.5350,
     scheduledTime: "2026-07-17T21:30:00+02:00",
     type: "meal",
-    emoji: "🍔",
+    emoji: "☕",
     description: "IONITY Guxhagen — McDonald's, tænder & nattøj",
     funFacts: [
       {
