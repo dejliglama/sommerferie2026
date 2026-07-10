@@ -24,9 +24,9 @@ export interface Waypoint {
 
 const fmt = (n: number) => n.toLocaleString("da-DK");
 
-// Afgang fredag 2026-07-17 kl. 13:30. Alle tider er i "Europe/Copenhagen"-agtig CEST,
+// Afgang fredag 2026-07-17 kl. 13:00. Alle tider er i "Europe/Copenhagen"-agtig CEST,
 // hvilket er fint da hele ruten (DK/DE/AT/CH/IT) ligger i samme tidszone om sommeren.
-export const TRIP_START = "2026-07-17T13:30:00+02:00";
+export const TRIP_START = "2026-07-17T13:00:00+02:00";
 
 export const waypoints: Waypoint[] = [
   {
@@ -35,7 +35,7 @@ export const waypoints: Waypoint[] = [
     short: "Afgang",
     lat: 56.0360,
     lon: 12.6136,
-    scheduledTime: "2026-07-17T13:30:00+02:00",
+    scheduledTime: "2026-07-17T13:00:00+02:00",
     type: "start",
     emoji: "🏠",
     description: "Afgang med 100% strøm i Kona'en!",
